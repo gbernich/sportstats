@@ -90,9 +90,6 @@ class Team:
 ### Functions to Create Objects
 def ParseSchedule(team):
 
-	# Initializations
-	#games = []
-
 	# Load webpage data
 	session  = requests.Session()
 	url      = 'https://www.baseball-reference.com/teams/' + team.teamID + '/2018-schedule-scores.shtml'
@@ -135,6 +132,5 @@ def ParseSchedule(team):
 			#print(row)
 			continue
 
-		#games.append(Game(stats))
 		team.addGame(Game(stats))
 
