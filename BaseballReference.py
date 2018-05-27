@@ -8,6 +8,7 @@ class Game:
 	
 	def __init__(self, stats):
 		self.gameID         = stats['gameID']
+		self.opponentID     = stats['opponentID']
 		self.result         = stats['result']
 		self.runsScored     = stats['runsScored']
 		self.runsAllowed    = stats['runsAllowed']
@@ -47,11 +48,12 @@ class Record:
 class Team:
 	
 	def __init__(self, team):
-		self.teamID     = team
-		self.games      = []
-		self.record     = Record()
-		self.homeRecord = Record()
-		self.awayRecord = Record()
+		self.teamID       = team
+		self.games        = []
+		self.record       = Record()
+		self.homeRecord   = Record()
+		self.awayRecord   = Record()
+		self.recordByTeam = {}
 
 	def addGame(self, game):
 		self.games.append(game)
@@ -69,6 +71,22 @@ class Team:
 			else:
 				self.homeRecord.addLoss()
 
+		self.updateRecordByTeam(game)
+
+	def updateRecordByTeam(self, game):
+		if (game.opponentID in self.recordByTeam.keys()):
+			if ('W' in game.result):
+				self.recordByTeam[game.opponentID].addWin()
+			else:
+				self.recordByTeam[game.opponentID].addLoss()
+		else:
+			self.recordByTeam[game.opponentID] = Record()
+			if ('W' in game.result):
+				self.recordByTeam[game.opponentID].addWin()
+			else:
+				self.recordByTeam[game.opponentID].addLoss()
+
+
 ### Functions to Create Objects
 def ParseSchedule(team):
 
@@ -80,7 +98,7 @@ def ParseSchedule(team):
 	url      = 'https://www.baseball-reference.com/teams/' + team.teamID + '/2018-schedule-scores.shtml'
 	response = session.get(url)
 
-	# Parse page source
+	# Parse games
 	table    = BeautifulSoup(response.text, "html.parser").find('tbody')
 	gameRows = BeautifulSoup(str(table),    "html.parser").findAll('tr')
 
@@ -100,6 +118,7 @@ def ParseSchedule(team):
 		try:
 			stats = {}
 			stats['gameID']          = BeautifulSoup(str(row), "html.parser").find('th', {'data-stat':'team_game'}).string
+			stats['opponentID']      = BeautifulSoup(str(row), "html.parser").find('td', {'data-stat':'opp_ID'}).string
 			stats['result']          = BeautifulSoup(str(row), "html.parser").find('td', {'data-stat':'win_loss_result'}).string
 			stats['runsScored']      = BeautifulSoup(str(row), "html.parser").find('td', {'data-stat':'R'}).string
 			stats['runsAllowed']     = BeautifulSoup(str(row), "html.parser").find('td', {'data-stat':'RA'}).string
@@ -119,4 +138,3 @@ def ParseSchedule(team):
 		#games.append(Game(stats))
 		team.addGame(Game(stats))
 
-	#print(len(games))
