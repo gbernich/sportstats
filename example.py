@@ -9,3 +9,8 @@ print("home  record: %2d-%2d (%.3f)" % (orioles.homeRecord.wins, orioles.homeRec
 print("away  record: %2d-%2d (%.3f)" % (orioles.awayRecord.wins, orioles.awayRecord.losses, orioles.awayRecord.winPercentage))
 
 print("Against Yankees: (%.3f)" % (orioles.recordByTeam['NYY'].winPercentage))
+print("Against Rays:    (%.3f)" % (orioles.recordByTeam['TBR'].winPercentage))
+
+# Get Pitcher Stats
+pitcher  = ParsePitcher('chris tillman')
+print('Chris Tillman Win Percentage: %s' %  pitcher.record.winPercentage)

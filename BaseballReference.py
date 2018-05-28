@@ -4,6 +4,15 @@ from bs4 import BeautifulSoup
 import sys
 
 ### Objects ###
+class Pitcher:
+
+	def __init__(self, name, stats):
+		self.name                 = name 
+		self.record               = Record()
+		self.record.wins          = stats['wins']
+		self.record.losses        = stats['losses']
+		self.record.winPercentage = "%.3f" % (float(stats['wins'])/float(stats['gamesStarted']))
+
 class Game:
 	
 	def __init__(self, stats):
@@ -134,3 +143,22 @@ def ParseSchedule(team):
 
 		team.addGame(Game(stats))
 
+def ParsePitcher(pitcher):
+
+	# Load webpage data
+	session   = requests.Session()
+	firstname = pitcher.split(' ')[0]
+	lastname  = pitcher.split(' ')[1]
+	initial   = lastname[0]
+	url       = 'https://www.baseball-reference.com/players/' + initial + '/' + lastname[0:5] + firstname[0:2] + '01.shtml'
+	response  = session.get(url)
+
+	# Parse pitching stats
+	table = BeautifulSoup(response.text, "html.parser").find('tr', {'id':'pitching_standard.2018'})
+
+	stats = {}
+	stats['wins']         = BeautifulSoup(str(table), "html.parser").find('td', {'data-stat':'W'}).string
+	stats['losses']       = BeautifulSoup(str(table), "html.parser").find('td', {'data-stat':'L'}).string
+	stats['gamesStarted'] = BeautifulSoup(str(table), "html.parser").find('td', {'data-stat':'GS'}).string
+
+	return Pitcher(pitcher, stats)
